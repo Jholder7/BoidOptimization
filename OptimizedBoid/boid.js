@@ -32,18 +32,12 @@ class Boid {
     }
   }
 
-  align(boids) {
-    let perceptionRadius = 50;
+  align(points) {
     let steering = createVector();
     let total = 0;
-    for (let other of boids) {
-      let d = dist(
-        this.position.x,
-        this.position.y,
-        other.position.x,
-        other.position.y
-      );
-      if (other != this && d < perceptionRadius) {
+    for (let point of points) {
+      let other = point.boid;
+      if (other != this) {
         steering.add(other.velocity);
         total++;
       }
@@ -57,18 +51,18 @@ class Boid {
     return steering;
   }
 
-  separation(boids) {
-    let perceptionRadius = 50;
+  separation(points) {
     let steering = createVector();
     let total = 0;
-    for (let other of boids) {
+    for (let point of points) {
+      let other = point.boid;
       let d = dist(
         this.position.x,
         this.position.y,
         other.position.x,
         other.position.y
       );
-      if (other != this && d < perceptionRadius) {
+      if (other != this) {
         let diff = p5.Vector.sub(this.position, other.position);
         diff.div(d * d);
         steering.add(diff);
@@ -84,18 +78,12 @@ class Boid {
     return steering;
   }
 
-  cohesion(boids) {
-    let perceptionRadius = 100;
+  cohesion(points) {
     let steering = createVector();
     let total = 0;
-    for (let other of boids) {
-      let d = dist(
-        this.position.x,
-        this.position.y,
-        other.position.x,
-        other.position.y
-      );
-      if (other != this && d < perceptionRadius) {
+    for (let point of points) {
+      let other = point.boid;
+      if (other != this) {
         steering.add(other.position);
         total++;
       }
@@ -110,10 +98,12 @@ class Boid {
     return steering;
   }
 
-  flock(boids) {
-    let alignment = this.align(boids);
-    let cohesion = this.cohesion(boids);
-    let separation = this.separation(boids);
+  flock(boidQuadTee) {
+    let perceptionRadius = 100;
+    let points = boidQuadTee.query(new Rectangle(this.position.x, this.position.y, perceptionRadius, perceptionRadius))
+    let alignment = this.align(points);
+    let cohesion = this.cohesion(points);
+    let separation = this.separation(points);
 
     alignment.mult(alignSlider.value());
     cohesion.mult(cohesionSlider.value());
